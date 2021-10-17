@@ -155,11 +155,10 @@ namespace Mirror
 
             if (conn != null && conn.identity != null)
             {
-                GameObject roomPlayer = conn.identity.gameObject;
-
-                // if null or not a room player, don't replace it
-                if (roomPlayer != null && roomPlayer.GetComponent<NetworkRoomPlayer>() != null)
-                    SceneLoadedForPlayer(conn, roomPlayer);
+                // if not null or not a room player, don't replace it
+                NetworkRoomPlayer roomPlayer = conn.identity.GetComponent<NetworkRoomPlayer>();
+                if (roomPlayer)
+                    SceneLoadedForPlayer(conn, roomPlayer.gameObject);
             }
         }
 
@@ -178,12 +177,11 @@ namespace Mirror
             }
 
             GameObject gamePlayer = OnRoomServerCreateGamePlayer(conn, roomPlayer);
-            #if UNITY_EDITOR
-            Debug.Assert(gamePlayer != null, "OnRoomServerCreateGamePlayer returned a null object!");
-            #endif
-
-            if (!OnRoomServerSceneLoadedForPlayer(conn, roomPlayer, gamePlayer))
+            if (gamePlayer == null)
+            {
+                Debug.LogWarning("OnRoomServerCreateGamePlayer returned a null object! Room player will not be replaced.");
                 return;
+            }
 
             // replace room player with game player
             NetworkServer.ReplacePlayerForConnection(conn, gamePlayer, true);
@@ -588,20 +586,6 @@ namespace Mirror
         public virtual void OnRoomServerAddPlayer(NetworkConnection conn)
         {
             base.OnServerAddPlayer(conn);
-        }
-
-        // for users to apply settings from their room player object to their in-game player object
-        /// <summary>
-        /// This is called on the server when it is told that a client has finished switching from the room scene to a game player scene.
-        /// <para>When switching from the room, the room-player is replaced with a game-player object. This callback function gives an opportunity to apply state from the room-player to the game-player object.</para>
-        /// </summary>
-        /// <param name="conn">The connection of the player</param>
-        /// <param name="roomPlayer">The room player object.</param>
-        /// <param name="gamePlayer">The game player object.</param>
-        /// <returns>False to not allow this player to replace the room player.</returns>
-        public virtual bool OnRoomServerSceneLoadedForPlayer(NetworkConnection conn, GameObject roomPlayer, GameObject gamePlayer)
-        {
-            return true;
         }
 
         /// <summary>
