@@ -320,8 +320,11 @@ namespace Mirror
                 // Debug.LogFormat(LogType.Log, "NetworkRoomManager.OnServerAddPlayer playerPrefab:{0}", roomPlayerPrefab.name);
 
                 GameObject newRoomGameObject = OnRoomServerCreateRoomPlayer(conn);
-                if (newRoomGameObject == null)
-                    newRoomGameObject = Instantiate(roomPlayerPrefab.gameObject, Vector3.zero, Quaternion.identity);
+                if (!newRoomGameObject)
+                {
+                    Debug.LogError("OnRoomServerCreateRoomPlayer returned null! A player object is not available to spawn in room!");
+                    return;
+                }
 
                 NetworkServer.AddPlayerForConnection(conn, newRoomGameObject);
             }
@@ -558,7 +561,7 @@ namespace Mirror
         /// <returns>The new room-player object.</returns>
         public virtual GameObject OnRoomServerCreateRoomPlayer(NetworkConnection conn)
         {
-            return null;
+            return Instantiate(roomPlayerPrefab.gameObject, Vector3.zero, Quaternion.identity);
         }
 
         /// <summary>
