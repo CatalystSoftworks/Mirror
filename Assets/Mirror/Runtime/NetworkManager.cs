@@ -1082,6 +1082,15 @@ namespace Mirror
             }
         }
 
+        /// <summary>
+        /// Gets the best NetworkStartPosition to use based on the selected PlayerSpawnMethod and given connection.
+        /// </summary>
+        /// <param name="conn">The player connection we're getting the start position for.</param>
+        public virtual Transform GetStartPositionForConnection(NetworkConnection conn)
+        {
+            return GetStartPosition();
+        }
+
         void OnServerConnectInternal(NetworkConnection conn)
         {
             //Debug.Log("NetworkManager.OnServerConnectInternal");
@@ -1241,7 +1250,7 @@ namespace Mirror
         // The default implementation for this function creates a new player object from the playerPrefab.
         public virtual void OnServerAddPlayer(NetworkConnection conn)
         {
-            Transform startPos = GetStartPosition();
+            Transform startPos = GetStartPositionForConnection(conn);
             GameObject player = startPos != null
                 ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
                 : Instantiate(playerPrefab);
