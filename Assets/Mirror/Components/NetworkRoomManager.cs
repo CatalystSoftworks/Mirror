@@ -178,14 +178,9 @@ namespace Mirror
             }
 
             GameObject gamePlayer = OnRoomServerCreateGamePlayer(conn, roomPlayer);
-            if (gamePlayer == null)
-            {
-                // get start position from base class
-                Transform startPos = GetStartPosition();
-                gamePlayer = startPos != null
-                    ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
-                    : Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
-            }
+            #if UNITY_EDITOR
+            Debug.Assert(gamePlayer != null, "OnRoomServerCreateGamePlayer returned a null object!");
+            #endif
 
             if (!OnRoomServerSceneLoadedForPlayer(conn, roomPlayer, gamePlayer))
                 return;
@@ -577,7 +572,11 @@ namespace Mirror
         /// <returns>A new GamePlayer object.</returns>
         public virtual GameObject OnRoomServerCreateGamePlayer(NetworkConnection conn, GameObject roomPlayer)
         {
-            return null;
+            // get start position from base class
+            Transform startPos = GetStartPositionForConnection(conn);
+            return startPos != null
+                ? Instantiate(playerPrefab, startPos.position, startPos.rotation)
+                : Instantiate(playerPrefab, Vector3.zero, Quaternion.identity);
         }
 
         /// <summary>
